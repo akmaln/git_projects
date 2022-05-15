@@ -1,10 +1,10 @@
 # Chapter 4: web element properties and methods
 
 from selenium import webdriver
+from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 import time
-
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
@@ -67,8 +67,7 @@ def webelement_methods(driver):
     #get attribute 'action' of compare
     print("action attribute of compare form: ", compare_btn.get_attribute('action'))
 
-
-def test_explicit_wait():
+def test_explicit_wait(driver):
     driver = webdriver.Chrome()
     driver.maximize_window()
     driver.implicitly_wait(20)
@@ -100,8 +99,6 @@ def test_explicit_wait():
     target_msg = driver.find_element(By.ID, 'h2').text
     print(f"target message: {target_msg}")
 
-
-
     print("###### element_to_be_clickable ######")
     print("check if button is enabled if not click on 'Enable button after 10 seconds'")
     print(f"checking the button: {driver.find_element(By.ID, 'disable').is_enabled()}")
@@ -113,3 +110,61 @@ def test_explicit_wait():
     webdriver_wait.until(EC.element_to_be_clickable((By.ID, 'disable')))
     driver.find_element(By.ID, 'disable').click()
     print("###### element_to_be_clickable ######")
+
+def test_drag_and_drop(driver):
+    driver = webdriver.Chrome()
+    driver.maximize_window()
+    driver.implicitly_wait(10)
+
+    print("#open website")
+    url = 'https://jqueryui.com/droppable/'
+    driver.get(url)
+
+    print("#find draggable element")
+    driver.switch_to.frame(0)
+    element1 = driver.find_element(By.ID, 'draggable')
+
+    print("#find droppable box where we need to drop first element")
+    element2 = driver.find_element(value='droppable')
+
+    print("#check the text before the action")
+    print(f"text in target element: {element2.text}")
+
+    print("#preform drag and drop action on above elements")
+    actions = ActionChains(driver)
+    actions.drag_and_drop(element1, element2).perform()
+
+    print("#check the text after the action")
+    print(f"text in target element: {element2.text}")
+    assert 'Droppped' in element2.text, "drag and drop action failed"
+
+def test_hover_over_action(driver):
+    driver = webdriver.Chrome()
+    driver.maximize_window()
+    driver.implicitly_wait(10)
+    webdriver_wait = WebDriverWait(driver, 10)
+
+    url = 'http://automationpractice.com'
+
+    p1_xpath = "//ul[@id='homefeatured']/li[1]"
+    add_to_cart_xpath = "//span[text()='Add to cart']"
+
+    print("#open the website")
+    driver.get(url)
+
+    print("#find the product element")
+
+    product1 = webdriver_wait.until(EC.presence_of_element_located((By.XPATH, p1_xpath)))
+    actions = ActionChains(driver)
+    actions.move_to_element(product1).perform()
+
+    print("#hover over the first product in Featured List")
+    product1 = webdriver_wait.until(EC.element_to_be_clickable((By.XPATH, add_to_cart_xpath)))
+    actions = ActionChains(driver)
+    driver.execute_script("window.scrollBy(0,500);")
+    actions.move_to_element(product1).perform()
+
+    print("#click on Add to Cart")
+    webdriver_wait.until(EC.element_to_be_clickable((By.XPATH, add_to_cart_xpath))).click()
+
+    pass
